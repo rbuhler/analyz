@@ -1,4 +1,0 @@
-1,v_A,as.numeric,numeric,7
-2,v_B,as.numeric,numeric,3
-3,v_Vector,as.vector,@,1,@,2
-4,Mean,mean,@,3,,,

@@ -1,9 +1,0 @@
-1,Paste,paste0,character,gbl.matrices,character,E.csv,,,,,,,,
-2,File,as.character,character,@,1,,,,,,,,,
-3,Header,as.logical,logical,TRUE,,,,,,,,,,
-4,Separation,as.character,character,",",,,,,,,,,,
-5,Quote,as.character,character,,,,,,,,,,,
-6,Decimal,as.character,character,.,,,,,,,,,,
-7,Names,as.numeric,numeric,1,,,,,,,,,,
-8,Matrix,read.table,@,2,@,3,@,4,@,5,@,6,@,7
-9,Princomp,princomp,@,8,@,3,,,,,,,,

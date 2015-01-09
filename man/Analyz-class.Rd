@@ -11,7 +11,7 @@ Class to manage analysis steps described in a CSV file.
 \describe{
 \item{\code{steps}}{A data frame attribute with the steps loaded from a CSV file.}
 
-\item{\code{nrLines}}{A numeric attribute wiht the number of steps.}
+\item{\code{nrRows}}{A numeric attribute wiht the number of steps.}
 
 \item{\code{nrColumns}}{A numeric attribute with the quantity of items of the largest step definition.}
 
