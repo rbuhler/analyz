@@ -4,7 +4,7 @@ analyz <- function(){
 }
 #' Class Analyz
 #' 
-#' Class to manage analysis steps described in a CSV file.
+#' @title Class to manage analysis steps described in a CSV file.
 #'
 #' @slot steps A data frame attribute with the steps loaded from a CSV file.
 #' @slot nrRows A numeric attribute wiht the number of steps.
@@ -64,7 +64,7 @@ setMethod( f="initialize",
 #' v_path <- vector()
 #' Analyz.loadSteps(obj) <- v_path
 #' @export
-#' 
+#'
 setGeneric("Analyz.loadSteps<-",
            function(object, value){standardGeneric("Analyz.loadSteps<-")})
 #' @rdname Analyz.loadSteps-methods

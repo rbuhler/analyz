@@ -1,13 +1,10 @@
 Package: analyz
 Type: Package
-Title: This package delivers a class to execute R commands from a CSV file with
-    steps.
-Version: 1.2
+Title: Package Analyz
+Version: 1.2.00
 Date: 2014-10-10
-Author: Rodrigo Buhler.
+Author: Rodrigo Buhler
 Maintainer: Rodrigo Buhler <rodrigo.buhler@ymail.com>
-Description: The current version delivers a class with methods to read and
-    prepare a execution of R commands described as steps on a CSV file.
-License: GPL (<=2)
-Depends:
-    methods (>= 3.0.2)
+Description: The current version delivers a class with methods to read and prepare a execution of R commands described as steps on a CSV file.
+License: GPL (>=2)
+Depends: methods (>= 3.0.2)
