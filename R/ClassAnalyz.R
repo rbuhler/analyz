@@ -17,7 +17,7 @@ setClass( Class="Analyz",
                           nrRows     = "numeric",
                           nrColumns  = "numeric",
                           stepItems  = "list",
-                          results    = "data.frame"),
+                          results    = "list"),
           validity=function(object){ 
             #--- INSPECTOR
            if(TRUE){
@@ -41,18 +41,18 @@ setMethod( f="initialize",
             .Object@nrRows    <- 0
             .Object@nrColumns <- 0
             .Object@stepItems <- list()
-            .Object@results   <- data.frame()
+            .Object@results   <- list()
             # -- Class inspection
             validObject(.Object)
             return(.Object) }
 )
-#--- SETTER
-#' Method Analyz.loadSteps<-
+# STEP 1
+#' Method Analyz.loadSteps
 #' 
 #' Description.
 #'
 #' @param object  Description.
-#' @param value   Description.
+#' @param path   Description.
 #' @return object Description.
 #' 
 #' @export
@@ -62,36 +62,40 @@ setMethod( f="initialize",
 #' @examples
 #' obj <- new("Analyz")
 #' v_path <- vector()
-#' Analyz.loadSteps(obj) <- v_path
+#' Analyz.loadSteps(obj, v_path)
 #' @export
 #'
-setGeneric("Analyz.loadSteps<-",
-           function(object, value){standardGeneric("Analyz.loadSteps<-")})
+setGeneric("Analyz.loadSteps",
+           function(object, path){standardGeneric("Analyz.loadSteps")})
 #' @rdname Analyz.loadSteps-methods
 #' @aliases Analyz.loadSteps,Analyz,Analyz-method
-setReplaceMethod( f="Analyz.loadSteps",
-                  signature="Analyz",
-                  definition=function(object, value){
-                    # -- Constants   
-                    HEADER  <- FALSE
-                    FACTORS <- FALSE
-                    ROWNMS  <- 1
-                    steps <- NULL
-                    # -- BODY
-                    path = value                    
-                    steps <- tryCatch(read.csv (file = path, header=HEADER, stringsAsFactors = FACTORS, row.names = ROWNMS),
-                                                error   = function(e) message(path, '\n', e),
-                                                warning = function(w) message(path, '\n', w)
-                    )
-                    if(!is.null(steps)){
-                      object@nrRows    <- nrow(steps)
-                      object@nrColumns <- ncol(steps)
-                      
-                      object@steps<-steps                      
-                    }
-                    return(object)
-                  }
+setMethod("Analyz.loadSteps",
+          "Analyz",
+          function(object, path)
+  {
+    # -- Constants   
+    HEADER  <- FALSE
+    FACTORS <- FALSE
+    ROWNMS  <- 1
+    # -- BODY
+    vSteps   <- NULL
+    vSteps  <- tryCatch(read.csv (file      = path, 
+                                 header    = HEADER, 
+                                 stringsAsFactors = FACTORS, 
+                                 row.names = ROWNMS),
+              error   = function(e) message(path, '\n', e),
+              warning = function(w) message(path, '\n', w)
+    )
+    if(!is.null(vSteps)){
+      object@nrRows    <- nrow(vSteps)
+      object@nrColumns <- ncol(vSteps)
+      
+      object@steps<-vSteps                      
+    }
+    return(object)
+  }
 )
+# STEP 2
 #' Method Analyz.getNrRows 
 #' 
 #' Description.
@@ -116,6 +120,7 @@ setMethod("Analyz.getNrRows",
           "Analyz",
           function(object){ return(object@nrRows) }
 )
+# STEP 3
 #' Method Analyz.getNrColumns
 #' 
 #' Description.
@@ -140,62 +145,13 @@ setMethod("Analyz.getNrColumns",
           "Analyz",
           function(object){ return(object@nrColumns) }
 )
-#' Method Analyz.getStep 
-#' 
-#' Description.
-#' 
-#' @param object    Description.
-#' @param index     Description.
-#' @return stepList Description.
-#' 
-#' @export
-#' @docType methods
-#' @rdname Analyz.getStep-methods
-#' 
-#' @examples
-#' obj <- new("Analyz")
-#' v_step <- Analyz.getStep(obj, 1)
-#' @export
-#' 
-setGeneric("Analyz.getStep",
-           function(object, index){standardGeneric("Analyz.getStep")})
-#' @rdname Analyz.getStep-methods
-#' @aliases Analyz.getStep,Analys,Analyz-method
-setMethod("Analyz.getStep",
-          "Analyz",
-          function(object, index){
-            
-            stepList <- list()
-            # -- Check for an empty data.frame
-            if(object@nrColumns > 0){ 
-              # -- "Walk" trhough a specific data.frame line
-              for(i in 1:object@nrColumns){ 
-                
-                vStep <- object@steps[index, i]
-                if(!is.na(vStep)){
-                
-                  if (length(stepList) == 0){
-                    stepList <- vStep
-                  }else{
-                    stepList <- c(stepList, vStep)
-                  }                  
-                }else{ # NA value
-                  # Skip
-                }
-              }              
-            }else{
-              FALSE
-            }
-            
-            return(as.list(stepList))
-          }
-)
-#' Method Analyz.setStepItems<-
+# STEP 4
+#' Method Analyz.setStepItems
 #' 
 #' Description.
 #' 
 #' @param object  Description.
-#' @param value   Description.
+#' @param index   Description.
 #' @return object Description.
 #' 
 #' @export
@@ -204,183 +160,151 @@ setMethod("Analyz.getStep",
 #' 
 #' @examples
 #' obj <- new("Analyz")
-#' v_value <- vector()
-#' Analyz.setStepItems(obj) <- v_value
+#' v_index <- numeric()
+#' Analyz.setStepItems(obj, v_index)
 #' @export
 #' 
-setGeneric("Analyz.setStepItems<-",
-           function(object, value){standardGeneric("Analyz.setStepItems<-")})
+setGeneric("Analyz.setStepItems",
+           function(object, index){standardGeneric("Analyz.setStepItems")})
 #' @rdname Analyz.setStepItems-methods
 #' @aliases Analyz.setStepItems,Analyz,Analyz-method
-setReplaceMethod( f="Analyz.setStepItems",
-                  signature  = "Analyz",
-                  definition = function(object, value){
-                    #---
-                    object@stepItems["title"]      <- value[1]
-                    object@stepItems["command"]    <- value[2]
-
-                    #--- From position 3 on the values are paramters
-                    vParms <- vector()
-                    for(i in 3:length(value)){
-                      #--- If the variable is empty create the first entry
-                      if( !is.na(value[i]) & (value[i] != "") ){
-                        vParms <- c(vParms, value[i])
-                      }else{
-                        break
-                      }
-                    }
-                    if(!length(vParms) == 0){
-                      object@stepItems["parameters"] <- vParms  
-                    }
-                    return(object)
-                  }
+setMethod("Analyz.setStepItems",
+          "Analyz", 
+          function(object, index)
+      {
+      
+      vTitle      <- c()
+      vCommand    <- c()
+      vStepSize   <- numeric()
+      vParameters <- list()
+      
+      vStepLine   <- object@steps[index,]
+      if(length(vStepLine) > 0 ){
+        
+        vTitle      <- vStepLine[[1]]
+        vCommand    <- vStepLine[[2]]
+        vStepSize   <- length(vStepLine)
+        vParameters <- vStepLine[3:vStepSize]
+        
+        # Remove NAs
+        vNAtab <- is.na(vParameters)
+        vParameters <- vParameters[!vNAtab]  
+        
+      }      
+      object@stepItems <- list("TITLE"=vTitle,
+                               "COMMAND"=vCommand,
+                               "PARAMETERS"=vParameters)
+      
+      return(object)
+      }
 )
-#' Method Analyz.getStepItems 
+# STEP 5
+#' Method Analyz.getStepTitle
 #' 
 #' Description.
 #' 
 #' @param object Description.
-#' @return stepItems  Description.
+#' @return stepTitle  Description.
 #' 
 #' @export
 #' @docType methods
-#' @rdname Analyz.getStepItems-methods
+#' @rdname Analyz.getStepTitle-methods
 #' 
 #' @examples
 #' obj <- new("Analyz")
-#' v_steps <- Analyz.getStepItems(obj)
+#' v_Title <- Analyz.getStepTitle(obj)
 #' @export
 #' 
-setGeneric("Analyz.getStepItems",
-           function(object){standardGeneric("Analyz.getStepItems")})
-#' @rdname Analyz.getStepItems-methods
-#' @aliases Analyz.getStepItems, Analyz, Analyz-method
-setMethod("Analyz.getStepItems",
+setGeneric("Analyz.getStepTitle",
+           function(object){standardGeneric("Analyz.getStepTitle")})
+#' @rdname Analyz.getStepTitle-methods
+#' @aliases Analyz.getStepTitle,Analyz,Analyz-method
+setMethod("Analyz.getStepTitle",
           "Analyz",
-          function(object){
-            vStepItems <- list()
-            vStepItems["title"]   <- as.character(object@stepItems["title"])
-            vStepItems["command"] <- as.character(object@stepItems["command"])            
-            #---
-            vParamLine   <- object@stepItems["parameters"]
-            vParamType  <- vParamValue <- ""
-            vParmIndex  <- 0
-            #---
-            vVector     <- vector()
-            vParameters <- list()
-            #---
-            vIndex      <- 1
-            vItem       <- vector()
-            for(x in 3:object@nrColumns){
-              vItem <- vParamLine[vIndex]
-              #--- Skip NA values
-              if(!is.null(vItem)){
-                #--- Item is the parameter type
-                if(vParamType ==  ""){ 
-                  vParamType  <- vItem
-                  vParamValue <- ""
-                #--- Item is the parameter value
-                }else{
-                  vParamValue <- vItem
-                  #--- Get the value from the result list
-                  if(vParamType == "@"){
-                    #--- Save previous results
-                    if(length(vVector) > 0){
-                      vParmIndex  <- vParmIndex+1
-                      vParameters[vParmIndex] <-list(vVector)
-                      vVector <- vector()
-                    }
-                    #-- Load the result and save
-                    vParmIndex  <- vParmIndex+1
-                    vParameters[vParmIndex] <- list( c( Analyz.getResult( object, as.numeric( vParamValue ) ) ) )
-                  }else{
-                    #--- Coercion needed
-                    vVector <- c( vVector, Analyz.coerceType( object, vParamValue, vParamType ))
-                  }
-                  vParamType  <- ""
-                }
-              }
-            }
-            #--- Save last result
-            if(length(vVector) > 0){
-              vParmIndex <- vParmIndex+1
-              vParameters[vParmIndex] <- list(vVector)
-            }
-            for(z in 1:length(vParameters)){
-              vStepItems["parameters"] <- list(vParameters[[z]])
-            }
-            return(vStepItems)
-          }
-)
-#' Method Analyz.getParameters 
+          function(object) { return(unlist(object@stepItems["TITLE"])) })
+
+# STEP 6
+#' Method Analyz.getStepCommand
 #' 
 #' Description.
 #' 
-#' @param object          Description.
-#' @return stepParameters Description.
+#' @param object Description.
+#' @return stepCommand  Description.
 #' 
 #' @export
 #' @docType methods
-#' @rdname Analyz.getParameters-methods
+#' @rdname Analyz.getStepCommand-methods
 #' 
 #' @examples
 #' obj <- new("Analyz")
-#' v_paramters <- Analyz.getParameters(obj)
+#' v_Command <- Analyz.getStepCommand(obj)
 #' @export
 #' 
-setGeneric("Analyz.getParameters",
-           function(object){standardGeneric("Analyz.getParameters")})
-#' @rdname Analyz.getParameters-methods
-#' @aliases Analyz.getParameters,Analyz,Analyz-method
-setMethod("Analyz.getParameters",
+setGeneric("Analyz.getStepCommand",
+           function(object){standardGeneric("Analyz.getStepCommand")})
+#' @rdname Analyz.getStepCommand-methods
+#' @aliases Analyz.getStepCommand,Analyz,Analyz-method
+setMethod("Analyz.getStepCommand",
           "Analyz",
-          function(object){
-            vParamType  <- vParamValue <- ""
-            vVector     <- vector()
-            vParamLine  <- unlist(object@stepItems["parameters"])
-            vParamIndex <- 0
-            vParameters <- list()
-            
-            vItem       <- vector()
-            for(x in 3:object@nrColumns){
-              vItem <- vParamLine[x-2]
-              #--- Skip NA values
-              if(!is.null(vItem)){
-                #--- Item is the parameter type
-                if(vParamType == ""){ 
-                  vParamType  <- vItem
-                  vParamValue <- ""
-                  #--- Item is the parameter value
-                }else{ 
-                  vParamValue <- vItem
-                  #--- Get the value from the result list
-                  if(vParamType == "@"){
-                    #--- Save previous results
-                    if(length(vVector) > 0){
-                      vParmIndex  <- vParmIndex+1
-                      vParameters[vParmIndex] <- list(vVector)
-                      vVector <- vector()
-                    }
-                    #-- Load the result and save
-                    vParmIndex  <- vParmIndex+1
-                    vParameters[vParmIndex] <- list( c( Analyz.getResult( object, as.numeric( vParamValue ) ) ) )
-                    message("Parameters ->> ", vParameters[vParmIndex])
-                  }else{
-                    #--- Coercion needed
-                    vVector <- c( vVector, Analyz.coerceType( object, vParamValue, vParamType ))
-                  }
-                  vParamType  <- ""
-                }
-              }
+          function(object) { return(unlist(object@stepItems["COMMAND"])) })
+
+# STEP 7
+#' Method Analyz.getStepParameters
+#' 
+#' Description.
+#' 
+#' @param object Description.
+#' @return stepParameters  Description.
+#' 
+#' @export
+#' @docType methods
+#' @rdname Analyz.getStepParameters-methods
+#' 
+#' @examples
+#' obj <- new("Analyz")
+#' v_Parameters <- Analyz.getStepParameters(obj)
+#' @export
+#' 
+setGeneric("Analyz.getStepParameters",
+           function(object){standardGeneric("Analyz.getStepParameters")})
+#' @rdname Analyz.getStepParameters-methods
+#' @aliases Analyz.getStepParameters,Analyz,Analyz-method
+setMethod("Analyz.getStepParameters",
+          "Analyz",
+          function(object) 
+  { 
+    vItems      <- unlist(object@stepItems["PARAMETERS"])
+    vSize       <- length(vItems)
+    vIsType     <- 1
+    vType       <- c()
+    vParameters <- list()
+    
+    if(vSize > 0){
+      
+      for(x in 1:vSize){
+        if (vItems[x] != ""){
+          
+          if(vIsType ==1){ # Item is the parameter type
+            vType   <- vItems[x]  
+            vIsType <- 0
+          }else{ # Item is the parameter itself
+            if(vType == '@'){
+              vParameters <- list(unlist(vParameters),
+                                  Analyz.getResult( object, as.numeric(vItems[x]) ))
+            }else{
+              vParameters <- list(unlist(vParameters),
+                                  Analyz.coerceType( object, vItems[x], vType ))
             }
-            #--- Save last result
-            if(length(vVector) > 0){
-              vParmIndex <- vParmIndex+1
-              vParameters[vParmIndex] <- list(vVector)
-            }
-            return(vParameters)
+            vIsType <- 1
           }
-)
+          
+        }else{ NULL }
+      }  
+      
+    }
+    
+    return(list(unlist(vParameters)))
+  })
 
 #' Method Analyz.runAnalysis 
 #' 
@@ -406,11 +330,22 @@ setGeneric("Analyz.runAnalysis",
 #' @aliases Analyz.runAnalysis,Analyz,Analyz-method
 setMethod("Analyz.runAnalysis",
           "Analyz",
-          function(object, command, parameters){
-            result <- c()
-            result <- do.call(command, parameters)
-            return( result )
-          }
+          function(object, command, parameters)
+  {
+    message("<<< Analyz.runAnalysis \n")
+    
+    vResult <- c()
+    
+    message("Command    : ", command)
+    message("Parameters : ", parameters)
+    
+    vResult <- do.call(command, parameters)
+    
+    message("Result     :", vResult)
+    
+    message("Analyz.runAnalysis >>>")
+    return( vResult )
+  }
 )
 #' Method Analyz.setResult<-
 #' 
@@ -437,7 +372,8 @@ setReplaceMethod( f="Analyz.setResult",
                   signature="Analyz",
                   definition=function(object, value){
                     # -- BODY
-                    object@results <- rbind( object@results, value )
+                    vIndex <- length(object@results)+1
+                    object@results[vIndex] <- list(value)
                     return(object)
                   }
 )
@@ -461,10 +397,9 @@ setGeneric("Analyz.getResult",
            function(object, index){standardGeneric("Analyz.getResult")})
 #' @rdname Analyz.getResult-methods
 #' @aliases Analyz.getResult,Analyz,Analyz-method
-#' 
 setMethod("Analyz.getResult",
           "Analyz",
-          function(object, index){ return( object@results[[index, 'value']] ) }
+          function(object, index){ return( unlist(object@results[index]) ) }
 )
 #' Method Analyz.coerceType
 #' 
@@ -515,7 +450,7 @@ setMethod("Analyz.coerceType",
                            warning = function(w) FALSE)
                      },
                      vector={
-                       tryCatch(result <- list(c(variable)),
+                       tryCatch(result <- c(variable),
                                 error = function(e) FALSE,
                                 warning = function(w) FALSE)
                      },
