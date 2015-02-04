@@ -12,6 +12,8 @@ analyz <- function(){
 #' @slot stepItems A list attribute with the items of a step.
 #' @slot results A list attribute with the execution result of the steps.
 #' 
+#' @import methods
+#' 
 setClass( Class="Analyz",
           representation( steps      = "data.frame",
                           nrRows     = "numeric",
@@ -76,13 +78,18 @@ setMethod("Analyz.loadSteps",
     # -- Constants   
     HEADER  <- FALSE
     FACTORS <- FALSE
-    ROWNMS  <- 1
+#   ROWNMS  <- 1
     # -- BODY
     vSteps   <- NULL
-    vSteps  <- tryCatch(read.csv (file      = path, 
-                                 header    = HEADER, 
-                                 stringsAsFactors = FACTORS, 
-                                 row.names = ROWNMS),
+#     vSteps  <- tryCatch(read.csv (file      = path, 
+#                                  header    = HEADER, 
+#                                  stringsAsFactors = FACTORS, 
+#                                  row.names = ROWNMS),
+vSteps  <- tryCatch(read.csv (
+                              file      = path, 
+                              header    = HEADER,
+                              stringsAsFactors = FACTORS
+                              ),
               error   = function(e) message(path, '\n', e),
               warning = function(w) message(path, '\n', w)
     )
@@ -278,6 +285,8 @@ setMethod("Analyz.getStepParameters",
     vIsType     <- 1
     vType       <- c()
     vParameters <- list()
+    vCount      <- 1
+    vEnvironment <- ".GlobalEnv"
     
     if(vSize > 0){
       
@@ -287,14 +296,23 @@ setMethod("Analyz.getStepParameters",
           if(vIsType ==1){ # Item is the parameter type
             vType   <- vItems[x]  
             vIsType <- 0
+            
           }else{ # Item is the parameter itself
-            if(vType == '@'){
-              vParameters <- list(unlist(vParameters),
-                                  Analyz.getResult( object, as.numeric(vItems[x]) ))
-            }else{
-              vParameters <- list(unlist(vParameters),
-                                  Analyz.coerceType( object, vItems[x], vType ))
-            }
+            switch(vType,
+                   # At (get the value from the results)
+                   "@"={
+                     vParameters[vCount]<-list(Analyz.getResult( object, as.numeric(vItems[x]) ))
+                   },
+                   # Dolar (get value from the Globals)
+                   "$"={
+                     vParameters[vCount]<-list(get(vItems[x], envir=as.environment(vEnvironment)))
+                   },
+                    # Default (coerce the value)
+                   {
+                     vParameters[vCount]<-list(Analyz.coerceType( object, vItems[[x]], vType ))
+                  }
+              )
+            vCount  <- vCount+1
             vIsType <- 1
           }
           
@@ -303,7 +321,7 @@ setMethod("Analyz.getStepParameters",
       
     }
     
-    return(list(unlist(vParameters)))
+    return(vParameters)
   })
 
 #' Method Analyz.runAnalysis 
@@ -322,7 +340,6 @@ setMethod("Analyz.getStepParameters",
 #' @examples
 #' obj <- new("Analyz")
 #' Analyz.runAnalysis(obj, 'mean', list(c(1,2,3)))
-#' @export
 #' 
 setGeneric("Analyz.runAnalysis",
            function(object, command, parameters){standardGeneric("Analyz.runAnalysis")})
@@ -331,20 +348,23 @@ setGeneric("Analyz.runAnalysis",
 setMethod("Analyz.runAnalysis",
           "Analyz",
           function(object, command, parameters)
-  {
-    message("<<< Analyz.runAnalysis \n")
+  { 
+    vResult <- vInfo <- c()
     
-    vResult <- c()
-    
-    message("Command    : ", command)
-    message("Parameters : ", parameters)
-    
-    vResult <- do.call(command, parameters)
-    
-    message("Result     :", vResult)
-    
-    message("Analyz.runAnalysis >>>")
-    return( vResult )
+#     message("Command    : ", command)
+#     message("Parameters : ", parameters)    
+    vInfo <- tryCatch(
+        vResult <- do.call(command, parameters),
+        error = function(e) return(e),
+        warning = function(w) return(w) 
+      )
+#     message("Result     : ", vResult)
+    if(length(vResult) > 0){
+      return( vResult )      
+    }else{
+      return(print(vInfo))
+    }
+
   }
 )
 #' Method Analyz.setResult<-
@@ -391,7 +411,8 @@ setReplaceMethod( f="Analyz.setResult",
 #' 
 #' @examples
 #' obj <- new("Analyz")
-#' v_result <- Analyz.getResult(obj, 1)
+#' vIdx <- numeric()
+#' v_result <- Analyz.getResult(obj, vIdx)
 #' @export
 setGeneric("Analyz.getResult",
            function(object, index){standardGeneric("Analyz.getResult")})
@@ -399,7 +420,18 @@ setGeneric("Analyz.getResult",
 #' @aliases Analyz.getResult,Analyz,Analyz-method
 setMethod("Analyz.getResult",
           "Analyz",
-          function(object, index){ return( unlist(object@results[index]) ) }
+          function(object, index)
+  { 
+    if( length(index) > 0 ){
+      if(index <= object@nrRows){
+        return( (object@results[[index]]) )
+      }else{
+        return( NULL )
+      } 
+    }else{
+      return( NULL )
+    }
+  }
 )
 #' Method Analyz.coerceType
 #' 
@@ -429,6 +461,11 @@ setMethod("Analyz.coerceType",
             result   <- FALSE
             # -- Coerce a variable to a defined type
             switch(type,
+                   null={
+                     tryCatch(result <- as.null(variable),
+                              error = function(e) FALSE,
+                              warning = function(w) FALSE)
+                   },
                      numeric={
                        tryCatch(result <- as.numeric(variable),
                                 error = function(e) FALSE,

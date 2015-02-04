@@ -1,4 +1,4 @@
 analyz
 ======
 
-Development of an R package for statistical analysis.
+Development of an R package for statistical analysis automation.

@@ -24,6 +24,7 @@ Description.
 }
 \examples{
 obj <- new("Analyz")
-v_result <- Analyz.getResult(obj, 1)
+vIdx <- numeric()
+v_result <- Analyz.getResult(obj, vIdx)
 }
 
