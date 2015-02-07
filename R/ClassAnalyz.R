@@ -7,7 +7,7 @@ analyz <- function(){
 #' @title Class to manage analysis steps described in a CSV file.
 #'
 #' @slot steps A data frame attribute with the steps loaded from a CSV file.
-#' @slot nrRows A numeric attribute wiht the number of steps.
+#' @slot nrRows A numeric attribute with the quantity of steps.
 #' @slot nrColumns A numeric attribute with the quantity of items of the largest step definition.
 #' @slot stepItems A list attribute with the items of a step.
 #' @slot results A list attribute with the execution result of the steps.
@@ -51,11 +51,11 @@ setMethod( f="initialize",
 # STEP 1
 #' Method Analyz.loadSteps
 #' 
-#' Description.
+#' Method for reading the analysis file and fill the "steps" class spot.
 #'
-#' @param object  Description.
-#' @param path   Description.
-#' @return object Description.
+#' @param object Object instance.
+#' @param path Path for the analysis file.
+#' @return object Object instance.
 #' 
 #' @export
 #' @docType methods
@@ -81,10 +81,7 @@ setMethod("Analyz.loadSteps",
 #   ROWNMS  <- 1
     # -- BODY
     vSteps   <- NULL
-#     vSteps  <- tryCatch(read.csv (file      = path, 
-#                                  header    = HEADER, 
-#                                  stringsAsFactors = FACTORS, 
-#                                  row.names = ROWNMS),
+
 vSteps  <- tryCatch(read.csv (
                               file      = path, 
                               header    = HEADER,
@@ -105,10 +102,10 @@ vSteps  <- tryCatch(read.csv (
 # STEP 2
 #' Method Analyz.getNrRows 
 #' 
-#' Description.
+#' Method for returning the number of rows read from the analysis file.
 #' 
-#' @param object   Description.
-#' @return nrRows Description.
+#' @param object Object instance.
+#' @return nrRows Number of read rows from the analysis file.
 #' 
 #' @export
 #' @docType methods
@@ -130,10 +127,10 @@ setMethod("Analyz.getNrRows",
 # STEP 3
 #' Method Analyz.getNrColumns
 #' 
-#' Description.
+#' Method for returning the number of columns read from the analysis file.
 #' 
-#' @param object     Description.
-#' @return nrColumns Description.
+#' @param object Object instance.
+#' @return nrColumns Number of read columns from the analysis file.
 #' 
 #' @export
 #' @docType methods
@@ -155,11 +152,11 @@ setMethod("Analyz.getNrColumns",
 # STEP 4
 #' Method Analyz.setStepItems
 #' 
-#' Description.
+#' Method for interpret a analysis line and fill a class spot.
 #' 
-#' @param object  Description.
-#' @param index   Description.
-#' @return object Description.
+#' @param object Object instance.
+#' @param index Index number of the step line to be read.
+#' @return object Object instance.
 #' 
 #' @export
 #' @docType methods
@@ -208,10 +205,10 @@ setMethod("Analyz.setStepItems",
 # STEP 5
 #' Method Analyz.getStepTitle
 #' 
-#' Description.
+#' Method for returning the current step title.
 #' 
-#' @param object Description.
-#' @return stepTitle  Description.
+#' @param object Object instance.
+#' @return stepTitle Description of the current step title.
 #' 
 #' @export
 #' @docType methods
@@ -233,10 +230,10 @@ setMethod("Analyz.getStepTitle",
 # STEP 6
 #' Method Analyz.getStepCommand
 #' 
-#' Description.
+#' Method for returning the current step command.
 #' 
-#' @param object Description.
-#' @return stepCommand  Description.
+#' @param object Object instance.
+#' @return stepCommand  Description of the current step command.
 #' 
 #' @export
 #' @docType methods
@@ -258,10 +255,10 @@ setMethod("Analyz.getStepCommand",
 # STEP 7
 #' Method Analyz.getStepParameters
 #' 
-#' Description.
+#' Method for returning the current step command parameters.
 #' 
-#' @param object Description.
-#' @return stepParameters  Description.
+#' @param object Object instance.
+#' @return stepParameters Description of the current step command parameters.
 #' 
 #' @export
 #' @docType methods
@@ -326,12 +323,12 @@ setMethod("Analyz.getStepParameters",
 
 #' Method Analyz.runAnalysis 
 #' 
-#' Description.
+#' Method for step execution.
 #' 
-#' @param object     Description.
-#' @param command    Description.
-#' @param parameters Description.
-#' @return result    Description.
+#' @param object Object instance.
+#' @param command Description of the step command to be executed.
+#' @param parameters Paramater(s) for the informed step command.
+#' @return result Result of the step execution.
 #' 
 #' @export
 #' @docType methods
@@ -351,14 +348,12 @@ setMethod("Analyz.runAnalysis",
   { 
     vResult <- vInfo <- c()
     
-#     message("Command    : ", command)
-#     message("Parameters : ", parameters)    
     vInfo <- tryCatch(
         vResult <- do.call(command, parameters),
         error = function(e) return(e),
         warning = function(w) return(w) 
       )
-#     message("Result     : ", vResult)
+
     if(length(vResult) > 0){
       return( vResult )      
     }else{
@@ -369,11 +364,11 @@ setMethod("Analyz.runAnalysis",
 )
 #' Method Analyz.setResult<-
 #' 
-#' Description.
+#' Method for storing the informed result to the "results" class spot.
 #' 
-#' @param object  Description.
-#' @param value   Description.
-#' @return object Description.
+#' @param object Object instance.
+#' @param value Result value of a execution.
+#' @return object Object instance.
 #' 
 #' @export
 #' @docType methods
@@ -399,11 +394,11 @@ setReplaceMethod( f="Analyz.setResult",
 )
 #' Method Analyz.getResult 
 #' 
-#' Description.
+#' Method for getting the informed result from "results" class spot.
 #' 
-#' @param object  Description.
-#' @param index   Description.
-#' @return result Description.
+#' @param object Object instance.
+#' @param index Index number of the results to be read.
+#' @return result Result value of the informed index.
 #' 
 #' @export
 #' @docType methods
@@ -437,10 +432,10 @@ setMethod("Analyz.getResult",
 #' 
 #' Method for variable type coercion.
 #' 
-#' @param object   Description.
-#' @param variable Description.
-#' @param type     Description.
-#' @return result  Description.
+#' @param object Object instance.
+#' @param variable Variable to be coerced.
+#' @param type Data type to coerce the informed variable.
+#' @return result Coerced variable.
 #' 
 #' @export
 #' @docType methods
